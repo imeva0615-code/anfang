@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8MCYYKHS80"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-8MCYYKHS80');
+</script>
+
 <title>安放 · 情緒釐清小工具</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -249,7 +258,7 @@
       <div class="summary-card" id="summary"></div>
       <button class="btn btn-primary" style="width:100%" onclick="copyMd()">複製這次的紀錄</button>
 
-      <a class="feedback-btn" id="fb-link" href="https://forms.gle/EE8UQHtQgjhMRQwf8" target="_blank" rel="noopener">這個小工具對妳有幫助嗎?(30 秒匿名回饋)</a>
+      <a class="feedback-btn" id="fb-link" href="https://forms.gle/EE8UQHtQgjhMRQwf8" target="_blank" rel="noopener" onclick="if(window.gtag)gtag('event','click_feedback')">這個小工具對妳有幫助嗎?(30 秒匿名回饋)</a>
 
       <div class="note">
         小提醒:這個工具是一個陪伴,不是全部的支援。如果同一種痛苦連續兩週幾乎每天出現、影響睡眠或生活,請把它交給專業心理師——那不是脆弱,是好好照顧自己。
@@ -281,6 +290,7 @@
     document.querySelector('.step.active').classList.remove('active');
     document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
     cur=n; paintDots(); window.scrollTo({top:0});
+    if(window.gtag) gtag('event','step_view',{step:n});
     if(n===3 && !breathDone) startBreath();
   }
   document.querySelectorAll('.chips .chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('sel')));
@@ -323,9 +333,11 @@
     const word=document.getElementById('in-word').value.trim()||'(這次沒有寫)';
     lastMd=`# 情緒紀錄 ${date} ${time}\n\n## 發生了什麼\n${ev}\n\n## 身體訊號\n${body}\n\n## 情緒與強度\n${emos} ・ 強度 ${inten}/10\n\n## 慣性檢查\n${pats}\n\n## 我需要\n${needs}\n\n## 一小步\n${step}\n\n## 給自己的一句話\n${word}\n\n---\n來自「安放」・ GlowUp Women\n`;
     document.getElementById('summary').textContent=lastMd;
+    if(window.gtag) gtag('event','complete_flow',{intensity:Number(inten)});
     go(7);
   }
   function copyMd(){
+    if(window.gtag) gtag('event','copy_entry');
     const done=()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);};
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(lastMd).then(done).catch(()=>fb(done));}else{fb(done);}
     function fb(cb){const ta=document.createElement('textarea');ta.value=lastMd;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);cb();}
