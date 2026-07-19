@@ -45,9 +45,13 @@
   header{padding:28px 0 8px;display:flex;align-items:baseline;justify-content:space-between}
   .brand{font-family:var(--serif);font-weight:700;font-size:20px;letter-spacing:.35em;color:var(--rose)}
   .brand small{display:block;font-family:var(--sans);font-weight:400;font-size:11px;letter-spacing:.16em;color:var(--ink-soft);margin-top:2px}
+  .head-right{display:flex;align-items:center;gap:14px}
   .dots{display:flex;gap:6px}
   .dots span{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .3s, transform .3s}
   .dots span.on{background:var(--rose);transform:scale(1.25)}
+  .lang-btn{border:1px solid var(--line);background:var(--white);color:var(--ink-soft);border-radius:999px;padding:5px 11px;font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer;font-family:var(--sans)}
+  .lang-btn:hover{color:var(--rose);border-color:var(--rose)}
+  .lang-btn:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
   main{flex:1;display:flex;flex-direction:column}
   .step{display:none;flex:1;flex-direction:column;animation:fadeIn .45s ease}
   .step.active{display:flex}
@@ -105,13 +109,25 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .subscribe-box{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px 18px;margin-top:18px;text-align:center}
   .subscribe-box p{font-size:14.5px;color:var(--ink);line-height:1.85;margin-bottom:16px}
+  .hist-card{border:1px solid var(--line);background:var(--white);border-radius:14px;margin-bottom:10px;overflow:hidden}
+  .hist-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;cursor:pointer}
+  .hist-head:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+  .hist-date{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .hist-tags{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+  .hist-del{border:none;background:transparent;color:var(--ink-soft);font-size:15px;cursor:pointer;padding:4px 6px;line-height:1}
+  .hist-del:hover{color:#b23b3b}
+  .hist-body{display:none;white-space:pre-wrap;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink);padding:0 16px 14px;border-top:1px solid var(--line)}
+  .hist-body.open{display:block;padding-top:12px}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
     <div class="brand">安放<small>GLOWUP WOMEN</small></div>
-    <div class="dots" id="dots"></div>
+    <div class="head-right">
+      <div class="dots" id="dots"></div>
+      <button class="lang-btn" id="lang-btn" onclick="toggleLang()" type="button">EN</button>
+    </div>
   </header>
 
   <main>
@@ -119,177 +135,186 @@
     <section class="step active" data-step="0">
       <div class="welcome">
         <div class="big">安放</div>
-        <div class="tagline">先感覺,再理解。</div>
-        <div class="sub">給自己五分鐘,把心裡的一團情緒,慢慢理清楚。<br>在這裡,妳不用表現好,也不用有結論。</div>
-        <div class="disclaimer">
-          這是一個自我覺察的小工具,<b>不是心理諮商或醫療</b>。妳的所有輸入只留在這支手機上,<b>不會上傳、也沒有人看得到</b>。若妳正經歷強烈痛苦,請直接聯繫下方的專業求助管道。
+        <div class="tagline" data-i18n="tagline">先感覺,再理解。</div>
+        <div class="sub" data-i18n-html="sub_html">給自己五分鐘,把心裡的一團情緒,慢慢理清楚。<br>在這裡,妳不用表現好,也不用有結論。</div>
+        <div class="disclaimer" data-i18n-html="disclaimer_html">
+          這是一個自我覺察的小工具,<b>不是心理諮商或醫療</b>。妳的所有輸入只留在這支手機的瀏覽器裡,<b>不會上傳、也沒有人看得到</b>。完成的紀錄會自動留在「我的紀錄」,妳可以隨時查看或刪除。為了解大家常遇到的情緒與需求類型,我們會匿名統計妳點選的<b>類別標籤</b>(例如選了哪些情緒),但妳親手寫下的文字內容不會被送出。若妳正經歷強烈痛苦,請直接聯繫下方的專業求助管道。
         </div>
         <div class="nav" style="margin-top:0">
-          <button class="btn btn-primary" onclick="go(1)">開始</button>
+          <button class="btn btn-primary" data-i18n="start_btn" onclick="go(1)">開始</button>
         </div>
+        <button class="btn btn-ghost" id="welcome-hist-btn" style="margin-top:10px;display:none;width:100%" onclick="go('hist')">查看我的紀錄</button>
       </div>
     </section>
 
     <!-- STEP 1 event -->
     <section class="step" data-step="1">
-      <div class="eyebrow">第一站 ・ 發生了什麼</div>
-      <h1>用一兩句話,<br>寫下剛剛發生的事。</h1>
-      <p class="hint">只寫事實就好,先不用解釋、不用分析原因。</p>
-      <textarea id="in-event" placeholder="例:開會時被主管當眾質疑,悶了一整天。/ 為了小事,又和家人起了爭執。"></textarea>
+      <div class="eyebrow" data-i18n="s1_eyebrow">第一站 ・ 發生了什麼</div>
+      <h1 data-i18n-html="s1_h1_html">用一兩句話,<br>寫下剛剛發生的事。</h1>
+      <p class="hint" data-i18n="s1_hint">只寫事實就好,先不用解釋、不用分析原因。</p>
+      <textarea id="in-event" data-i18n-ph="s1_ph" placeholder="例:開會時被主管當眾質疑,悶了一整天。/ 為了小事,又和家人起了爭執。"></textarea>
       <div class="nav">
-        <button class="btn btn-ghost" onclick="go(0)">返回</button>
-        <button class="btn btn-primary" onclick="go(2)">下一站</button>
+        <button class="btn btn-ghost" data-i18n="nav_back" onclick="go(0)">返回</button>
+        <button class="btn btn-primary" data-i18n="nav_next" onclick="go(2)">下一站</button>
       </div>
     </section>
 
     <!-- STEP 2 body -->
     <section class="step" data-step="2">
-      <div class="eyebrow">第二站 ・ 身體先知道</div>
-      <h1>妳的身體,<br>現在哪裡有感覺?</h1>
-      <p class="hint">情緒常常先出現在身體。點選符合的,可複選。</p>
+      <div class="eyebrow" data-i18n="s2_eyebrow">第二站 ・ 身體先知道</div>
+      <h1 data-i18n-html="s2_h1_html">妳的身體,<br>現在哪裡有感覺?</h1>
+      <p class="hint" data-i18n="s2_hint">情緒常常先出現在身體。點選符合的,可複選。</p>
       <div class="chips" data-multi="body">
-        <button class="chip">胸口悶悶的</button>
-        <button class="chip">喉嚨哽住</button>
-        <button class="chip">眼眶熱熱的</button>
-        <button class="chip">肩頸緊繃</button>
-        <button class="chip">胃往下沉</button>
-        <button class="chip">頭脹脹的</button>
-        <button class="chip">很累,想睡</button>
-        <button class="chip">心跳很快</button>
-        <button class="chip">手腳冰冷</button>
-        <button class="chip">說不上來</button>
+        <button class="chip" data-key="b1">胸口悶悶的</button>
+        <button class="chip" data-key="b2">喉嚨哽住</button>
+        <button class="chip" data-key="b3">眼眶熱熱的</button>
+        <button class="chip" data-key="b4">肩頸緊繃</button>
+        <button class="chip" data-key="b5">胃往下沉</button>
+        <button class="chip" data-key="b6">頭脹脹的</button>
+        <button class="chip" data-key="b7">很累,想睡</button>
+        <button class="chip" data-key="b8">心跳很快</button>
+        <button class="chip" data-key="b9">手腳冰冷</button>
+        <button class="chip" data-key="b10">說不上來</button>
       </div>
       <div class="nav">
-        <button class="btn btn-ghost" onclick="go(1)">返回</button>
-        <button class="btn btn-primary" onclick="go(3)">下一站</button>
+        <button class="btn btn-ghost" data-i18n="nav_back" onclick="go(1)">返回</button>
+        <button class="btn btn-primary" data-i18n="nav_next" onclick="go(3)">下一站</button>
       </div>
     </section>
 
     <!-- STEP 3 pause -->
     <section class="step" data-step="3">
-      <div class="eyebrow">第三站 ・ 暫停</div>
+      <div class="eyebrow" data-i18n="s3_eyebrow">第三站 ・ 暫停</div>
       <div class="breath-stage">
         <div class="breath-circle" aria-hidden="true"></div>
         <div class="breath-word" id="breath-word">吸氣</div>
         <div class="breath-timer" id="breath-timer">30</div>
-        <p class="hint" style="margin-top:18px;max-width:280px">
+        <p class="hint" style="margin-top:18px;max-width:280px" data-i18n-html="s3_hint_html">
           這三十秒,不分析、不找答案。<br>只陪這個感覺待在一起。<br>先不急著解決它。
         </p>
       </div>
       <div class="nav">
-        <button class="btn btn-ghost" onclick="go(2)">返回</button>
+        <button class="btn btn-ghost" data-i18n="nav_back" onclick="go(2)">返回</button>
         <button class="btn btn-primary" id="breath-next" onclick="go(4)" disabled style="opacity:.45">陪著它 (30s)</button>
       </div>
     </section>
 
     <!-- STEP 4 name it -->
     <section class="step" data-step="4">
-      <div class="eyebrow">第四站 ・ 給它一個名字</div>
-      <h1>這個感覺,<br>比較接近哪些?</h1>
-      <p class="hint">被命名的情緒,就開始被理解了。可複選。</p>
-      <div class="group-label">悲傷系</div>
-      <div class="chips" data-multi="emo"><button class="chip">委屈</button><button class="chip">失落</button><button class="chip">孤單</button><button class="chip">心疼自己</button></div>
-      <div class="group-label">恐懼系</div>
-      <div class="chips" data-multi="emo"><button class="chip">焦慮</button><button class="chip">不安</button><button class="chip">怕來不及</button></div>
-      <div class="group-label">羞愧系</div>
-      <div class="chips" data-multi="emo"><button class="chip">不夠好的感覺</button><button class="chip">丟臉</button><button class="chip">自責</button></div>
-      <div class="group-label">憤怒系</div>
-      <div class="chips" data-multi="emo"><button class="chip">生氣</button><button class="chip">不公平</button><button class="chip">煩躁</button></div>
-      <div class="group-label">同時也有</div>
-      <div class="chips" data-multi="emo"><button class="chip">感動</button><button class="chip">替別人開心</button><button class="chip">鬆一口氣</button><button class="chip">說不清楚</button></div>
+      <div class="eyebrow" data-i18n="s4_eyebrow">第四站 ・ 給它一個名字</div>
+      <h1 data-i18n-html="s4_h1_html">這個感覺,<br>比較接近哪些?</h1>
+      <p class="hint" data-i18n="s4_hint">被命名的情緒,就開始被理解了。可複選。</p>
+      <div class="group-label" data-i18n="g_sad">悲傷系</div>
+      <div class="chips" data-multi="emo"><button class="chip" data-key="e1">委屈</button><button class="chip" data-key="e2">失落</button><button class="chip" data-key="e3">孤單</button><button class="chip" data-key="e4">心疼自己</button></div>
+      <div class="group-label" data-i18n="g_fear">恐懼系</div>
+      <div class="chips" data-multi="emo"><button class="chip" data-key="e5">焦慮</button><button class="chip" data-key="e6">不安</button><button class="chip" data-key="e7">怕來不及</button></div>
+      <div class="group-label" data-i18n="g_shame">羞愧系</div>
+      <div class="chips" data-multi="emo"><button class="chip" data-key="e8">不夠好的感覺</button><button class="chip" data-key="e9">丟臉</button><button class="chip" data-key="e10">自責</button></div>
+      <div class="group-label" data-i18n="g_anger">憤怒系</div>
+      <div class="chips" data-multi="emo"><button class="chip" data-key="e11">生氣</button><button class="chip" data-key="e12">不公平</button><button class="chip" data-key="e13">煩躁</button></div>
+      <div class="group-label" data-i18n="g_also">同時也有</div>
+      <div class="chips" data-multi="emo"><button class="chip" data-key="e14">感動</button><button class="chip" data-key="e15">替別人開心</button><button class="chip" data-key="e16">鬆一口氣</button><button class="chip" data-key="e17">說不清楚</button></div>
       <div class="slider-wrap">
-        <div class="group-label">強度</div>
+        <div class="group-label" data-i18n="intensity_label">強度</div>
         <div class="slider-val" id="int-val">5</div>
-        <input type="range" min="1" max="10" value="5" id="in-intensity" aria-label="情緒強度">
-        <div class="slider-ends"><span>微微的</span><span>非常強烈</span></div>
+        <input type="range" min="1" max="10" value="5" id="in-intensity" data-i18n-aria="intensity_aria" aria-label="情緒強度">
+        <div class="slider-ends"><span data-i18n="slider_mild">微微的</span><span data-i18n="slider_intense">非常強烈</span></div>
       </div>
       <div class="nav">
-        <button class="btn btn-ghost" onclick="go(3)">返回</button>
-        <button class="btn btn-primary" onclick="go(5)">下一站</button>
+        <button class="btn btn-ghost" data-i18n="nav_back" onclick="go(3)">返回</button>
+        <button class="btn btn-primary" data-i18n="nav_next" onclick="go(5)">下一站</button>
       </div>
     </section>
 
     <!-- STEP 5 patterns (generic + self-name) -->
     <section class="step" data-step="5">
-      <div class="eyebrow">第五站 ・ 慣性檢查</div>
-      <h1>有沒有一個熟悉的<br>念頭又出現了?</h1>
-      <p class="hint">這些是很常見的思考習慣。看見它,不用急著改。有出現的就點選。</p>
+      <div class="eyebrow" data-i18n="s5_eyebrow">第五站 ・ 慣性檢查</div>
+      <h1 data-i18n-html="s5_h1_html">有沒有一個熟悉的<br>念頭又出現了?</h1>
+      <p class="hint" data-i18n="s5_hint">這些是很常見的思考習慣。看見它,不用急著改。有出現的就點選。</p>
       <div id="patterns">
-        <div class="pattern" tabindex="0" data-name="全有全無"><span class="p-name">全有全無:不是完美,就是失敗</span><span class="mark">✓</span></div>
-        <div class="pattern" tabindex="0" data-name="災難化"><span class="p-name">災難化:把最壞的結果當成一定會發生</span><span class="mark">✓</span></div>
-        <div class="pattern" tabindex="0" data-name="應該句式"><span class="p-name">應該句式:我「應該」要做到⋯⋯</span><span class="mark">✓</span></div>
-        <div class="pattern" tabindex="0" data-name="讀心術"><span class="p-name">讀心術:我猜別人一定是這樣看我</span><span class="mark">✓</span></div>
-        <div class="pattern" tabindex="0" data-name="拿別人的尺量自己"><span class="p-name">拿別人的尺量自己:用別人的進度評自己</span><span class="mark">✓</span></div>
-        <div class="pattern" tabindex="0" data-name="都要自己扛"><span class="p-name">都要自己扛:不習慣、也沒想過求助</span><span class="mark">✓</span></div>
-        <div class="pattern" tabindex="0" data-name="急著解決,跳過感受"><span class="p-name">急著解決:還沒感受完,就先想辦法</span><span class="mark">✓</span></div>
+        <div class="pattern" tabindex="0" data-key="p1" data-name="全有全無"><span class="p-name">全有全無:不是完美,就是失敗</span><span class="mark">✓</span></div>
+        <div class="pattern" tabindex="0" data-key="p2" data-name="災難化"><span class="p-name">災難化:把最壞的結果當成一定會發生</span><span class="mark">✓</span></div>
+        <div class="pattern" tabindex="0" data-key="p3" data-name="應該句式"><span class="p-name">應該句式:我「應該」要做到⋯⋯</span><span class="mark">✓</span></div>
+        <div class="pattern" tabindex="0" data-key="p4" data-name="讀心術"><span class="p-name">讀心術:我猜別人一定是這樣看我</span><span class="mark">✓</span></div>
+        <div class="pattern" tabindex="0" data-key="p5" data-name="拿別人的尺量自己"><span class="p-name">拿別人的尺量自己:用別人的進度評自己</span><span class="mark">✓</span></div>
+        <div class="pattern" tabindex="0" data-key="p6" data-name="都要自己扛"><span class="p-name">都要自己扛:不習慣、也沒想過求助</span><span class="mark">✓</span></div>
+        <div class="pattern" tabindex="0" data-key="p7" data-name="急著解決,跳過感受"><span class="p-name">急著解決:還沒感受完,就先想辦法</span><span class="mark">✓</span></div>
       </div>
-      <div class="group-label" style="margin-top:16px">或者,用妳自己的話寫下它</div>
-      <textarea id="in-pattern" style="min-height:64px" placeholder="例:我又在想「別人一定覺得我不夠好」。"></textarea>
+      <div class="group-label" style="margin-top:16px" data-i18n="own_pattern_label">或者,用妳自己的話寫下它</div>
+      <textarea id="in-pattern" style="min-height:64px" data-i18n-ph="s5_ph" placeholder="例:我又在想「別人一定覺得我不夠好」。"></textarea>
       <div class="nav">
-        <button class="btn btn-ghost" onclick="go(4)">返回</button>
-        <button class="btn btn-primary" onclick="go(6)">下一站</button>
+        <button class="btn btn-ghost" data-i18n="nav_back" onclick="go(4)">返回</button>
+        <button class="btn btn-primary" data-i18n="nav_next" onclick="go(6)">下一站</button>
       </div>
     </section>
 
     <!-- STEP 6 need + step -->
     <section class="step" data-step="6">
-      <div class="eyebrow">第六站 ・ 我需要什麼</div>
-      <h1>此刻的妳,<br>最需要的是?</h1>
+      <div class="eyebrow" data-i18n="s6_eyebrow">第六站 ・ 我需要什麼</div>
+      <h1 data-i18n-html="s6_h1_html">此刻的妳,<br>最需要的是?</h1>
       <div class="chips" data-multi="need">
-        <button class="chip">好好哭一下</button>
-        <button class="chip">休息</button>
-        <button class="chip">被理解</button>
-        <button class="chip">跟一個真人說</button>
-        <button class="chip">動一動・散步</button>
-        <button class="chip">設一個界線</button>
-        <button class="chip">什麼都不做</button>
-        <button class="chip">寫下來就好</button>
+        <button class="chip" data-key="n1">好好哭一下</button>
+        <button class="chip" data-key="n2">休息</button>
+        <button class="chip" data-key="n3">被理解</button>
+        <button class="chip" data-key="n4">跟一個真人說</button>
+        <button class="chip" data-key="n5">動一動・散步</button>
+        <button class="chip" data-key="n6">設一個界線</button>
+        <button class="chip" data-key="n7">什麼都不做</button>
+        <button class="chip" data-key="n8">寫下來就好</button>
       </div>
-      <div class="group-label" style="margin-top:22px">如果要做一小步,那會是什麼?(可留空)</div>
-      <textarea id="in-step" style="min-height:70px" placeholder="例:今晚十一點前關電腦。/ 傳訊息約朋友吃飯。"></textarea>
-      <div class="group-label" style="margin-top:18px">最後,給自己一句話</div>
-      <textarea id="in-word" style="min-height:70px" placeholder="寫一句妳現在最想聽到的話。"></textarea>
+      <div class="group-label" style="margin-top:22px" data-i18n="step_label">如果要做一小步,那會是什麼?(可留空)</div>
+      <textarea id="in-step" style="min-height:70px" data-i18n-ph="s6b_ph" placeholder="例:今晚十一點前關電腦。/ 傳訊息約朋友吃飯。"></textarea>
+      <div class="group-label" style="margin-top:18px" data-i18n="word_label">最後,給自己一句話</div>
+      <textarea id="in-word" style="min-height:70px" data-i18n-ph="s6c_ph" placeholder="寫一句妳現在最想聽到的話。"></textarea>
       <div class="phrase-row">
-        <button class="phrase">辛苦了。</button>
-        <button class="phrase">妳已經做得很好了。</button>
-        <button class="phrase">今天不用證明什麼。</button>
-        <button class="phrase">難過是可以的。</button>
-        <button class="phrase">妳不用一個人扛。</button>
+        <button class="phrase" data-key="ph1">辛苦了。</button>
+        <button class="phrase" data-key="ph2">妳已經做得很好了。</button>
+        <button class="phrase" data-key="ph3">今天不用證明什麼。</button>
+        <button class="phrase" data-key="ph4">難過是可以的。</button>
+        <button class="phrase" data-key="ph5">妳不用一個人扛。</button>
       </div>
       <div class="nav">
-        <button class="btn btn-ghost" onclick="go(5)">返回</button>
-        <button class="btn btn-primary" onclick="finish()">完成</button>
+        <button class="btn btn-ghost" data-i18n="nav_back" onclick="go(5)">返回</button>
+        <button class="btn btn-primary" data-i18n="finish_btn" onclick="finish()">完成</button>
       </div>
     </section>
 
     <!-- STEP 7 summary -->
     <section class="step" data-step="7">
-      <div class="eyebrow">收下</div>
-      <h1>這一次,妳好好<br>接住了自己。</h1>
-      <p class="hint">想留著的話,複製下面的紀錄,貼到妳的筆記或備忘錄。它只會待在妳選擇的地方。</p>
+      <div class="eyebrow" data-i18n="s7_eyebrow">收下</div>
+      <h1 data-i18n-html="s7_h1_html">這一次,妳好好<br>接住了自己。</h1>
+      <p class="hint" data-i18n="s7_hint">這次的紀錄已經自動留在「我的紀錄」裡了。想另外備份的話,也可以複製貼到妳的筆記或備忘錄。</p>
       <div class="summary-card" id="summary"></div>
-      <button class="btn btn-primary" style="width:100%" onclick="copyMd()">複製這次的紀錄</button>
+      <button class="btn btn-primary" style="width:100%" data-i18n="copy_btn" onclick="copyMd()">複製這次的紀錄</button>
 
       <!-- 訂閱導流區塊(安放專用表單,文案已內建於 MailerLite 表單本身) -->
       <div class="subscribe-box" id="subscribe-box">
         <div class="ml-embedded" data-form="vZk2Ow"></div>
       </div>
 
-      <a class="feedback-btn" id="fb-link" href="https://forms.gle/EE8UQHtQgjhMRQwf8" target="_blank" rel="noopener" onclick="if(window.gtag)gtag('event','click_feedback')">這個小工具對妳有幫助嗎?(30 秒匿名回饋)</a>
+      <a class="feedback-btn" id="fb-link" data-i18n="feedback_link" href="https://forms.gle/EE8UQHtQgjhMRQwf8" target="_blank" rel="noopener" onclick="if(window.gtag)gtag('event','click_feedback')">這個小工具對妳有幫助嗎?(30 秒匿名回饋)</a>
 
-      <div class="note">
+      <div class="note" data-i18n="note_text">
         小提醒:這個工具是一個陪伴,不是全部的支援。如果同一種痛苦連續兩週幾乎每天出現、影響睡眠或生活,請把它交給專業心理師——那不是脆弱,是好好照顧自己。
       </div>
 
-      <div class="resources">
-        <div style="margin-bottom:6px"><b>需要有人聊聊時,台灣的免付費專線</b></div>
-        <div class="r-line"><span>衛福部安心專線(24hr)</span><b>1925</b></div>
-        <div class="r-line"><span>生命線(24hr)</span><b>1995</b></div>
-        <div class="r-line"><span>張老師專線</span><b>1980</b></div>
-      </div>
+      <div class="resources" id="resources"></div>
 
       <div class="nav">
-        <button class="btn btn-ghost" style="flex:1" onclick="restart()">再做一次</button>
+        <button class="btn btn-ghost" style="flex:1" data-i18n="restart_btn" onclick="restart()">再做一次</button>
+        <button class="btn btn-ghost" style="flex:1" data-i18n="view_hist_btn" onclick="go('hist')">查看我的紀錄</button>
+      </div>
+    </section>
+
+    <!-- STEP hist: my records -->
+    <section class="step" data-step="hist">
+      <div class="eyebrow" data-i18n="hist_eyebrow">我的紀錄</div>
+      <h1 data-i18n-html="hist_h1_html">妳陪自己走過的<br>每一次時刻。</h1>
+      <p class="hint" data-i18n="hist_hint">點一則紀錄可以展開完整內容。這些資料只存在這支手機的瀏覽器裡,不會上傳。</p>
+      <div id="hist-list"></div>
+      <div class="nav">
+        <button class="btn btn-ghost" data-i18n="nav_back" onclick="go(0)">返回</button>
+        <button class="btn btn-ghost" id="hist-clear-btn" style="color:#b23b3b" data-i18n="clear_hist_btn" onclick="clearHistory()">清除全部紀錄</button>
       </div>
     </section>
   </main>
@@ -303,18 +328,218 @@
   for(let i=0;i<TOTAL;i++) dots.appendChild(document.createElement('span'));
   function paintDots(){[...dots.children].forEach((d,i)=>d.classList.toggle('on', i<=cur));}
   paintDots();
+
+  // ---- 多語系(純前端,不影響資料儲存邏輯)----
+  const translations = {
+    zh: {
+      page_title: '安放 · 情緒釐清小工具',
+      tagline: '先感覺,再理解。',
+      sub_html: '給自己五分鐘,把心裡的一團情緒,慢慢理清楚。<br>在這裡,妳不用表現好,也不用有結論。',
+      disclaimer_html: '這是一個自我覺察的小工具,<b>不是心理諮商或醫療</b>。妳的所有輸入只留在這支手機的瀏覽器裡,<b>不會上傳、也沒有人看得到</b>。完成的紀錄會自動留在「我的紀錄」,妳可以隨時查看或刪除。為了解大家常遇到的情緒與需求類型,我們會匿名統計妳點選的<b>類別標籤</b>(例如選了哪些情緒),但妳親手寫下的文字內容不會被送出。若妳正經歷強烈痛苦,請直接聯繫下方的專業求助管道。',
+      start_btn: '開始',
+      nav_back: '返回', nav_next: '下一站', finish_btn: '完成', restart_btn: '再做一次',
+      view_hist_btn: '查看我的紀錄', view_hist_count: '查看我的紀錄({n})',
+      clear_hist_btn: '清除全部紀錄', hist_del_aria: '刪除這則紀錄',
+      hist_empty: '還沒有任何紀錄。完成一次練習後,會自動留在這裡。',
+      hist_eyebrow: '我的紀錄', hist_h1_html: '妳陪自己走過的<br>每一次時刻。',
+      hist_hint: '點一則紀錄可以展開完整內容。這些資料只存在這支手機的瀏覽器裡,不會上傳。',
+      s1_eyebrow: '第一站 ・ 發生了什麼', s1_h1_html: '用一兩句話,<br>寫下剛剛發生的事。',
+      s1_hint: '只寫事實就好,先不用解釋、不用分析原因。',
+      s1_ph: '例:開會時被主管當眾質疑,悶了一整天。/ 為了小事,又和家人起了爭執。',
+      s2_eyebrow: '第二站 ・ 身體先知道', s2_h1_html: '妳的身體,<br>現在哪裡有感覺?',
+      s2_hint: '情緒常常先出現在身體。點選符合的,可複選。',
+      s3_eyebrow: '第三站 ・ 暫停',
+      s3_hint_html: '這三十秒,不分析、不找答案。<br>只陪這個感覺待在一起。<br>先不急著解決它。',
+      breath_in: '吸氣', breath_hold: '停一下', breath_out: '吐氣', breath_done: '很好。',
+      stay_with_it: '陪著它 ({t}s)',
+      s4_eyebrow: '第四站 ・ 給它一個名字', s4_h1_html: '這個感覺,<br>比較接近哪些?',
+      s4_hint: '被命名的情緒,就開始被理解了。可複選。',
+      g_sad: '悲傷系', g_fear: '恐懼系', g_shame: '羞愧系', g_anger: '憤怒系', g_also: '同時也有',
+      intensity_label: '強度', slider_mild: '微微的', slider_intense: '非常強烈', intensity_aria: '情緒強度',
+      s5_eyebrow: '第五站 ・ 慣性檢查', s5_h1_html: '有沒有一個熟悉的<br>念頭又出現了?',
+      s5_hint: '這些是很常見的思考習慣。看見它,不用急著改。有出現的就點選。',
+      own_pattern_label: '或者,用妳自己的話寫下它',
+      s5_ph: '例:我又在想「別人一定覺得我不夠好」。',
+      s6_eyebrow: '第六站 ・ 我需要什麼', s6_h1_html: '此刻的妳,<br>最需要的是?',
+      step_label: '如果要做一小步,那會是什麼?(可留空)',
+      s6b_ph: '例:今晚十一點前關電腦。/ 傳訊息約朋友吃飯。',
+      word_label: '最後,給自己一句話',
+      s6c_ph: '寫一句妳現在最想聽到的話。',
+      s7_eyebrow: '收下', s7_h1_html: '這一次,妳好好<br>接住了自己。',
+      s7_hint: '這次的紀錄已經自動留在「我的紀錄」裡了。想另外備份的話,也可以複製貼到妳的筆記或備忘錄。',
+      copy_btn: '複製這次的紀錄',
+      feedback_link: '這個小工具對妳有幫助嗎?(30 秒匿名回饋)',
+      note_text: '小提醒:這個工具是一個陪伴,不是全部的支援。如果同一種痛苦連續兩週幾乎每天出現、影響睡眠或生活,請把它交給專業心理師——那不是脆弱,是好好照顧自己。',
+      copied_toast: '已複製',
+      confirm_delete: '確定要刪除這則紀錄嗎?',
+      confirm_clear: '確定要清除全部紀錄嗎?這個動作無法復原。',
+      md_title: '情緒紀錄', md_event: '發生了什麼', md_body: '身體訊號', md_emotion: '情緒與強度',
+      md_pattern: '慣性檢查', md_need: '我需要', md_step: '一小步', md_word: '給自己的一句話',
+      md_footer: '來自「安放」・ GlowUp Women',
+      md_empty_event: '(未填)', md_empty_generic: '(無)', md_unnamed: '(未命名)',
+      md_no_pattern: '(這次沒有特別的)', md_no_step: '(暫時不需要)', md_no_word: '(這次沒有寫)',
+      md_own_prefix: '(自填) ',
+      chips: {
+        b1:'胸口悶悶的', b2:'喉嚨哽住', b3:'眼眶熱熱的', b4:'肩頸緊繃', b5:'胃往下沉',
+        b6:'頭脹脹的', b7:'很累,想睡', b8:'心跳很快', b9:'手腳冰冷', b10:'說不上來',
+        e1:'委屈', e2:'失落', e3:'孤單', e4:'心疼自己',
+        e5:'焦慮', e6:'不安', e7:'怕來不及',
+        e8:'不夠好的感覺', e9:'丟臉', e10:'自責',
+        e11:'生氣', e12:'不公平', e13:'煩躁',
+        e14:'感動', e15:'替別人開心', e16:'鬆一口氣', e17:'說不清楚',
+        n1:'好好哭一下', n2:'休息', n3:'被理解', n4:'跟一個真人說',
+        n5:'動一動・散步', n6:'設一個界線', n7:'什麼都不做', n8:'寫下來就好'
+      },
+      patterns: {
+        p1:'全有全無:不是完美,就是失敗',
+        p2:'災難化:把最壞的結果當成一定會發生',
+        p3:'應該句式:我「應該」要做到⋯⋯',
+        p4:'讀心術:我猜別人一定是這樣看我',
+        p5:'拿別人的尺量自己:用別人的進度評自己',
+        p6:'都要自己扛:不習慣、也沒想過求助',
+        p7:'急著解決:還沒感受完,就先想辦法'
+      },
+      phrases: { ph1:'辛苦了。', ph2:'妳已經做得很好了。', ph3:'今天不用證明什麼。', ph4:'難過是可以的。', ph5:'妳不用一個人扛。' },
+      resources_html: '<div style="margin-bottom:6px"><b>需要有人聊聊時,台灣的免付費專線</b></div>'
+        + '<div class="r-line"><span>衛福部安心專線(24hr)</span><b>1925</b></div>'
+        + '<div class="r-line"><span>生命線(24hr)</span><b>1995</b></div>'
+        + '<div class="r-line"><span>張老師專線</span><b>1980</b></div>'
+    },
+    en: {
+      page_title: 'Anfang · A Space to Sort Out Feelings',
+      tagline: 'Feel first, understand after.',
+      sub_html: "Give yourself five minutes to gently untangle what's inside.<br>Here, you don't have to perform, and you don't need a conclusion.",
+      disclaimer_html: 'This is a self-awareness tool, <b>not therapy or medical care</b>. Everything you enter stays only in this browser on this device — <b>nothing is uploaded, and no one can see it</b>. Finished entries are automatically saved to "My Records," which you can view or delete anytime. To understand what emotions and needs come up most often, we anonymously count which <b>category tags</b> you select (e.g. which emotions), but the text you write is never sent anywhere. If you\'re going through intense distress, please reach out directly to the resources below.',
+      start_btn: 'Begin',
+      nav_back: 'Back', nav_next: 'Next Station', finish_btn: 'Complete', restart_btn: 'Do It Again',
+      view_hist_btn: 'View My Records', view_hist_count: 'View My Records ({n})',
+      clear_hist_btn: 'Clear All Records', hist_del_aria: 'Delete this entry',
+      hist_empty: "No records yet. They'll be saved here automatically once you complete a session.",
+      hist_eyebrow: 'My Records', hist_h1_html: 'Every moment<br>you showed up for yourself.',
+      hist_hint: "Tap an entry to expand it. This data lives only in this browser on this device — it's never uploaded.",
+      s1_eyebrow: 'Station 1 · What Happened', s1_h1_html: 'In a sentence or two,<br>write down what just happened.',
+      s1_hint: 'Just the facts for now — no need to explain or analyze why.',
+      s1_ph: 'e.g., My manager questioned me in front of everyone at a meeting, and it stuck with me all day. / Had another argument with family over something small.',
+      s2_eyebrow: 'Station 2 · The Body Knows First', s2_h1_html: 'Where in your body<br>do you feel it right now?',
+      s2_hint: 'Emotions often show up in the body first. Select all that apply.',
+      s3_eyebrow: 'Station 3 · Pause',
+      s3_hint_html: "For these thirty seconds, don't analyze, don't look for answers.<br>Just stay with the feeling.<br>There's no rush to fix it.",
+      breath_in: 'Breathe in', breath_hold: 'Hold', breath_out: 'Breathe out', breath_done: 'Good.',
+      stay_with_it: 'Stay with it ({t}s)',
+      s4_eyebrow: 'Station 4 · Give It a Name', s4_h1_html: 'Which of these<br>feels closest?',
+      s4_hint: 'A named emotion is already a little more understood. Select all that apply.',
+      g_sad: 'Sadness', g_fear: 'Fear', g_shame: 'Shame', g_anger: 'Anger', g_also: 'Also present',
+      intensity_label: 'Intensity', slider_mild: 'Mild', slider_intense: 'Very intense', intensity_aria: 'Emotional intensity',
+      s5_eyebrow: 'Station 5 · Pattern Check', s5_h1_html: 'Is there a familiar<br>thought showing up again?',
+      s5_hint: 'These are common thinking habits. Just notice them — no need to rush to fix anything. Select any that show up.',
+      own_pattern_label: 'Or write it in your own words',
+      s5_ph: 'e.g., I\'m thinking "everyone must think I\'m not good enough" again.',
+      s6_eyebrow: 'Station 6 · What I Need', s6_h1_html: 'Right now,<br>what do you need most?',
+      step_label: 'If there were one small step, what would it be? (optional)',
+      s6b_ph: 'e.g., Turn off the computer by 11pm tonight. / Text a friend to grab a meal.',
+      word_label: 'Finally, say something kind to yourself',
+      s6c_ph: "Write one sentence you'd most like to hear right now.",
+      s7_eyebrow: 'Received', s7_h1_html: 'This time,<br>you showed up for yourself.',
+      s7_hint: 'This entry has already been saved to "My Records." You can also copy it below to back it up in your own notes.',
+      copy_btn: 'Copy This Entry',
+      feedback_link: 'Was this helpful? (30-second anonymous feedback)',
+      note_text: "A gentle reminder: this tool is a companion, not a full support system. If the same pain shows up almost every day for two weeks and it's affecting your sleep or daily life, please bring it to a professional therapist — that's not weakness, it's taking care of yourself.",
+      copied_toast: 'Copied',
+      confirm_delete: 'Delete this entry?',
+      confirm_clear: 'Clear all records? This cannot be undone.',
+      md_title: 'Emotion Log', md_event: 'What Happened', md_body: 'Body Signals', md_emotion: 'Emotions & Intensity',
+      md_pattern: 'Pattern Check', md_need: 'What I Need', md_step: 'One Small Step', md_word: 'A Word for Myself',
+      md_footer: 'From Anfang · GlowUp Women',
+      md_empty_event: '(not filled in)', md_empty_generic: '(none)', md_unnamed: '(unnamed)',
+      md_no_pattern: '(nothing in particular this time)', md_no_step: '(not needed right now)', md_no_word: "(didn't write one this time)",
+      md_own_prefix: '(self-written) ',
+      chips: {
+        b1:'Tightness in the chest', b2:'Lump in the throat', b3:'Eyes welling up', b4:'Tense shoulders/neck', b5:'Sinking feeling in the stomach',
+        b6:'Head feels heavy', b7:'Exhausted, want to sleep', b8:'Racing heartbeat', b9:'Cold hands and feet', b10:"Can't quite tell",
+        e1:'Wronged', e2:'Let down', e3:'Lonely', e4:'Aching for myself',
+        e5:'Anxious', e6:'Uneasy', e7:"Afraid it's too late",
+        e8:'Not good enough', e9:'Embarrassed', e10:'Self-blame',
+        e11:'Angry', e12:'Unfair', e13:'Irritated',
+        e14:'Moved', e15:'Happy for someone else', e16:'Relieved', e17:'Hard to put into words',
+        n1:'A good cry', n2:'Rest', n3:'To be understood', n4:'To talk to a real person',
+        n5:'Move · take a walk', n6:'Set a boundary', n7:'To do nothing', n8:'Just writing it down'
+      },
+      patterns: {
+        p1:"All-or-nothing: if it's not perfect, it's a failure",
+        p2:'Catastrophizing: assuming the worst will definitely happen',
+        p3:'Should statements: I "should" be able to...',
+        p4:'Mind reading: assuming I know how others see me',
+        p5:"Comparing: measuring myself by someone else's progress",
+        p6:'Carrying it all alone: not used to, or never considered, asking for help',
+        p7:'Rushing to fix: jumping to solutions before fully feeling it'
+      },
+      phrases: { ph1:'That was hard.', ph2:"You're doing great.", ph3:"You don't owe anyone proof today.", ph4:"It's okay to feel sad.", ph5:"You don't have to carry this alone." },
+      resources_html: '<div style="margin-bottom:6px"><b>Free helplines, if you\'d like to talk to someone</b></div>'
+        + '<div class="r-line"><span>Taiwan · MOHW Anxin Line (24hr)</span><b>1925</b></div>'
+        + '<div class="r-line"><span>Taiwan · Lifeline (24hr)</span><b>1995</b></div>'
+        + '<div class="r-line"><span>Taiwan · Teacher Chang Line</span><b>1980</b></div>'
+        + '<div class="r-line"><span>United States · 988 Suicide &amp; Crisis Lifeline (24hr, call or text)</span><b>988</b></div>'
+        + '<div style="margin-top:8px;font-size:12px">Outside Taiwan or the US? Find a local helpline at <a href="https://findahelpline.com" target="_blank" rel="noopener" style="color:var(--rose-deep)">findahelpline.com</a></div>'
+    }
+  };
+  let currentLang = localStorage.getItem('anfang_lang') || 'zh';
+  function t(key){ const d=translations[currentLang]||translations.zh; return d[key]!==undefined ? d[key] : (translations.zh[key]||''); }
+  function dict(){ return translations[currentLang]||translations.zh; }
+  function applyLang(lang){
+    currentLang = lang;
+    localStorage.setItem('anfang_lang', lang);
+    document.documentElement.lang = lang==='en' ? 'en' : 'zh-Hant';
+    document.title = t('page_title');
+    const langBtn=document.getElementById('lang-btn');
+    if(langBtn) langBtn.textContent = lang==='en' ? '中文' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el=>{ el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el=>{ el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+    document.querySelectorAll('.chip[data-key]').forEach(c=>{ c.textContent = dict().chips[c.dataset.key]; });
+    document.querySelectorAll('.phrase[data-key]').forEach(ph=>{ ph.textContent = dict().phrases[ph.dataset.key]; });
+    document.querySelectorAll('.pattern[data-key]').forEach(p=>{
+      const label = dict().patterns[p.dataset.key];
+      p.querySelector('.p-name').textContent = label;
+      p.dataset.name = label;
+    });
+    const resEl=document.getElementById('resources');
+    if(resEl) resEl.innerHTML = t('resources_html');
+    if(!breathDone){
+      document.getElementById('breath-next').textContent = t('stay_with_it').replace('{t}', document.getElementById('breath-timer').textContent||'30');
+    }
+    refreshWelcomeHistBtn();
+    if(document.querySelector('.step[data-step="hist"]').classList.contains('active')) renderHistory();
+  }
+  function toggleLang(){
+    if(window.gtag) gtag('event','switch_lang',{lang: currentLang==='zh'?'en':'zh'});
+    applyLang(currentLang==='zh' ? 'en' : 'zh');
+  }
+
   function go(n){
     document.querySelector('.step.active').classList.remove('active');
     document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
     cur=n; paintDots(); window.scrollTo({top:0});
     if(window.gtag) gtag('event','step_view',{step:n});
     if(n===3 && !breathDone) startBreath();
+    if(n==='hist') renderHistory();
   }
-  document.querySelectorAll('.chips .chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('sel')));
+  document.querySelectorAll('.chips .chip').forEach(c=>c.addEventListener('click',()=>{
+    const wasSel=c.classList.contains('sel');
+    c.classList.toggle('sel');
+    if(!wasSel && window.gtag){
+      const group=c.closest('.chips').dataset.multi;
+      gtag('event','select_'+group,{item:c.textContent.trim()});
+    }
+  }));
   document.querySelectorAll('.pattern').forEach(p=>{
-    const t=()=>p.classList.toggle('sel');
-    p.addEventListener('click',t);
-    p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}});
+    const t2=()=>{
+      const wasSel=p.classList.contains('sel');
+      p.classList.toggle('sel');
+      if(!wasSel && window.gtag) gtag('event','select_pattern',{item:p.dataset.name});
+    };
+    p.addEventListener('click',t2);
+    p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t2();}});
   });
   const rng=document.getElementById('in-intensity');
   rng.addEventListener('input',()=>document.getElementById('int-val').textContent=rng.value);
@@ -324,38 +549,97 @@
   }));
   function startBreath(){
     const word=document.getElementById('breath-word'), timerEl=document.getElementById('breath-timer'), nextBtn=document.getElementById('breath-next');
-    let t=30, wi=0; const words=['吸氣','停一下','吐氣','停一下'];
+    let ti=30, wi=0; const words=[t('breath_in'), t('breath_hold'), t('breath_out'), t('breath_hold')];
     word.textContent=words[0];
     const wordId=setInterval(()=>{wi=(wi+1)%4;word.textContent=words[wi];},2000);
     breathTimerId=setInterval(()=>{
-      t--; timerEl.textContent=t; nextBtn.textContent=`陪著它 (${t}s)`;
-      if(t<=0){clearInterval(breathTimerId);clearInterval(wordId);breathDone=true;timerEl.textContent='';word.textContent='很好。';nextBtn.disabled=false;nextBtn.style.opacity='1';nextBtn.textContent='下一站';}
+      ti--; timerEl.textContent=ti; nextBtn.textContent=t('stay_with_it').replace('{t}', ti);
+      if(ti<=0){clearInterval(breathTimerId);clearInterval(wordId);breathDone=true;timerEl.textContent='';word.textContent=t('breath_done');nextBtn.disabled=false;nextBtn.style.opacity='1';nextBtn.textContent=t('nav_next');}
     },1000);
   }
   function collect(sel){return [...document.querySelectorAll(sel)].map(e=>e.textContent.replace('✓','').trim());}
+
+  // ---- 我的紀錄(本地儲存,不上傳)----
+  const HIST_KEY='anfang_history_v1';
+  function loadHistory(){try{return JSON.parse(localStorage.getItem(HIST_KEY))||[];}catch(e){return [];}}
+  function saveHistory(list){try{localStorage.setItem(HIST_KEY, JSON.stringify(list));}catch(e){}}
+  function esc(s){const d=document.createElement('div');d.textContent=String(s);return d.innerHTML;}
+  function refreshWelcomeHistBtn(){
+    const btn=document.getElementById('welcome-hist-btn');
+    if(!btn) return;
+    const n=loadHistory().length;
+    btn.style.display = n?'block':'none';
+    btn.textContent = t('view_hist_count').replace('{n}', n);
+  }
+  function renderHistory(){
+    const list=loadHistory();
+    const listEl=document.getElementById('hist-list');
+    const clearBtn=document.getElementById('hist-clear-btn');
+    if(!list.length){
+      listEl.innerHTML=`<p class="hint">${esc(t('hist_empty'))}</p>`;
+      if(clearBtn) clearBtn.style.display='none';
+      return;
+    }
+    if(clearBtn) clearBtn.style.display='';
+    listEl.innerHTML=list.map(e=>`
+      <div class="hist-card">
+        <div class="hist-head" tabindex="0" role="button" aria-expanded="false" onclick="toggleHist(${e.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHist(${e.id});}">
+          <div>
+            <div class="hist-date">${esc(e.date)} ${esc(e.time)}</div>
+            <div class="hist-tags">${esc(e.emotions)} ・ ${esc(t('intensity_label'))} ${esc(e.intensity)}/10</div>
+          </div>
+          <button class="hist-del" onclick="event.stopPropagation();deleteEntry(${e.id})" aria-label="${esc(t('hist_del_aria'))}">✕</button>
+        </div>
+        <div class="hist-body" id="hist-body-${e.id}">${esc(e.md)}</div>
+      </div>
+    `).join('');
+  }
+  function toggleHist(id){
+    const el=document.getElementById('hist-body-'+id);
+    if(el) el.classList.toggle('open');
+  }
+  function deleteEntry(id){
+    if(!confirm(t('confirm_delete'))) return;
+    saveHistory(loadHistory().filter(e=>e.id!==id));
+    if(window.gtag) gtag('event','delete_entry');
+    renderHistory();
+    refreshWelcomeHistBtn();
+  }
+  function clearHistory(){
+    if(!confirm(t('confirm_clear'))) return;
+    saveHistory([]);
+    if(window.gtag) gtag('event','clear_history');
+    renderHistory();
+    refreshWelcomeHistBtn();
+  }
+
   let lastMd='';
   function finish(){
     const now=new Date(), pad=n=>String(n).padStart(2,'0');
     const date=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`, time=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    const ev=document.getElementById('in-event').value.trim()||'(未填)';
-    const body=collect('[data-multi="body"] .chip.sel').join('、')||'(無)';
-    const emos=collect('[data-multi="emo"] .chip.sel').join('、')||'(未命名)';
+    const ev=document.getElementById('in-event').value.trim()||t('md_empty_event');
+    const body=collect('[data-multi="body"] .chip.sel').join('、')||t('md_empty_generic');
+    const emos=collect('[data-multi="emo"] .chip.sel').join('、')||t('md_unnamed');
     const inten=document.getElementById('in-intensity').value;
     const patsSel=[...document.querySelectorAll('.pattern.sel')].map(p=>p.dataset.name);
     const patOwn=document.getElementById('in-pattern').value.trim();
-    if(patOwn) patsSel.push('(自填) '+patOwn);
-    const pats=patsSel.length?patsSel.map(p=>'- '+p).join('\n'):'(這次沒有特別的)';
-    const needs=collect('[data-multi="need"] .chip.sel').join('、')||'(無)';
-    const step=document.getElementById('in-step').value.trim()||'(暫時不需要)';
-    const word=document.getElementById('in-word').value.trim()||'(這次沒有寫)';
-    lastMd=`# 情緒紀錄 ${date} ${time}\n\n## 發生了什麼\n${ev}\n\n## 身體訊號\n${body}\n\n## 情緒與強度\n${emos} ・ 強度 ${inten}/10\n\n## 慣性檢查\n${pats}\n\n## 我需要\n${needs}\n\n## 一小步\n${step}\n\n## 給自己的一句話\n${word}\n\n---\n來自「安放」・ GlowUp Women\n`;
+    if(patOwn) patsSel.push(t('md_own_prefix')+patOwn);
+    const pats=patsSel.length?patsSel.map(p=>'- '+p).join('\n'):t('md_no_pattern');
+    const needs=collect('[data-multi="need"] .chip.sel').join('、')||t('md_empty_generic');
+    const step=document.getElementById('in-step').value.trim()||t('md_no_step');
+    const word=document.getElementById('in-word').value.trim()||t('md_no_word');
+    lastMd=`# ${t('md_title')} ${date} ${time}\n\n## ${t('md_event')}\n${ev}\n\n## ${t('md_body')}\n${body}\n\n## ${t('md_emotion')}\n${emos} ・ ${t('intensity_label')} ${inten}/10\n\n## ${t('md_pattern')}\n${pats}\n\n## ${t('md_need')}\n${needs}\n\n## ${t('md_step')}\n${step}\n\n## ${t('md_word')}\n${word}\n\n---\n${t('md_footer')}\n`;
     document.getElementById('summary').textContent=lastMd;
+    const hist=loadHistory();
+    hist.unshift({id:now.getTime(), date, time, emotions:emos, intensity:Number(inten), md:lastMd});
+    saveHistory(hist);
+    refreshWelcomeHistBtn();
     if(window.gtag) gtag('event','complete_flow',{intensity:Number(inten)});
     go(7);
   }
   function copyMd(){
     if(window.gtag) gtag('event','copy_entry');
-    const done=()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);};
+    const done=()=>{const tst=document.getElementById('toast');tst.textContent=t('copied_toast');tst.classList.add('show');setTimeout(()=>tst.classList.remove('show'),2200);};
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(lastMd).then(done).catch(()=>fb(done));}else{fb(done);}
     function fb(cb){const ta=document.createElement('textarea');ta.value=lastMd;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);cb();}
   }
@@ -365,7 +649,7 @@
     rng.value=5;document.getElementById('int-val').textContent='5';
     breathDone=false;
     const nextBtn=document.getElementById('breath-next');
-    nextBtn.disabled=true;nextBtn.style.opacity='.45';nextBtn.textContent='陪著它 (30s)';
+    nextBtn.disabled=true;nextBtn.style.opacity='.45';nextBtn.textContent=t('stay_with_it').replace('{t}','30');
     document.getElementById('breath-timer').textContent='30';
     go(0);
   }
@@ -377,6 +661,8 @@
       subBox.removeEventListener('mousedown', once);
     });
   }
+
+  applyLang(currentLang);
 </script>
 </body>
 </html>
